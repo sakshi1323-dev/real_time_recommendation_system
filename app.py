@@ -2,8 +2,7 @@ import streamlit as st
 import pandas as pd
 import sqlite3
 from model.recommender import build_model, recommend
-conn=sqlite3.connect("database.db")
-df=pd.read_sql("SELECT * FROM movies_data", conn)
+df=pd.read_csv("data/merged_data.csv")
 user_item, similarity=build_model(df)
 st.title("🎬 Movie Recommendation System")
 st.write("Get personalized movie recommendations!")
