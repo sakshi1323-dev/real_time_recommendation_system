@@ -2,12 +2,16 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 import pandas as pd
 from recommender import build_model, recommend
+import os
 
 app = Flask(__name__)
 CORS(app)
 
-# Load data
-df = pd.read_csv("backend/data/merged_data.csv")
+# Correct path handling
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+file_path = os.path.join(BASE_DIR, "data", "merged_data.csv")
+
+df = pd.read_csv(file_path)
 
 # Build model
 user_item, similarity = build_model(df)
@@ -23,7 +27,6 @@ def get_recommendations(user_id):
     result = [{"movie": movie, "rating": float(rating)} for movie, rating in recs.items()]
     
     return jsonify(result)
-import os
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
