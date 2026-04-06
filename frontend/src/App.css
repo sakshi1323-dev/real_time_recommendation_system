@@ -6,12 +6,12 @@ body {
   color: white;
 }
 
-/* Main App */
+
 .app {
   text-align: center;
 }
 
-/* Navbar */
+
 .navbar {
   background-color: black;
   padding: 15px;
@@ -24,7 +24,7 @@ body {
   margin: 0;
 }
 
-/* Input Section */
+
 .input-section {
   margin: 30px auto;
 }
@@ -50,7 +50,7 @@ body {
   background-color: #f40612;
 }
 
-/* Grid Layout */
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
