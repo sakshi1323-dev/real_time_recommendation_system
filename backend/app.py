@@ -31,3 +31,21 @@ def get_recommendations(user_id):
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
+
+from flask import request
+
+users = {}
+
+@app.route("/register", methods=["POST"])
+def register():
+    data = request.json
+    users[data["username"]] = data["password"]
+    return {"message": "User registered"}
+
+@app.route("/login", methods=["POST"])
+def login():
+    data = request.json
+    if users.get(data["username"]) == data["password"]:
+        return {"message": "Login successful"}
+    return {"message": "Invalid credentials"}
