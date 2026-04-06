@@ -1,62 +1,47 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import "./App.css";
 
 function App() {
-  const [data, setData] = useState([]);
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
+  const [userId, setUserId] = useState("");
+  const [recommendations, setRecommendations] = useState([]);
 
-  // Fetch recommendations
-  useEffect(() => {
-    fetch("https://recommender-backend-b4rq.onrender.com/recommend/1")
-      .then((res) => res.json())
-      .then((result) => setData(result))
-      .catch((err) => console.log(err));
-  }, []);
-
-  // Login function
-  const login = async () => {
-    const res = await fetch("https://recommender-backend-b4rq.onrender.com/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    });
-
-    const result = await res.json();
-    setMessage(result.message);
+  const fetchRecommendations = async () => {
+    const res = await fetch(`https://your-backend.onrender.com/recommend/${userId}`);
+    const data = await res.json();
+    setRecommendations(data);
   };
 
   return (
-    <div>
-      <h1>Movie Recommendations</h1>
+    <div className="app">
+      
+      {/* Navbar */}
+      <div className="navbar">
+        <h1>🎬 MovieFlix</h1>
+      </div>
 
-      {/* 🔐 LOGIN FORM */}
-      <h2>Login</h2>
-      <input
-        placeholder="Username"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-      />
-      <br />
-      <input
-        placeholder="Password"
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <br />
-      <button onClick={login}>Login</button>
+      {/* Input Section */}
+      <div className="input-section">
+        <input
+          type="number"
+          placeholder="Enter User ID"
+          value={userId}
+          onChange={(e) => setUserId(e.target.value)}
+        />
+        <button onClick={fetchRecommendations}>
+          Get Recommendations
+        </button>
+      </div>
 
-      <p>{message}</p>
-
-      {/* 🎬 RECOMMENDATIONS */}
-      <ul>
-        {data.map((item, index) => (
-          <li key={index}>
-            {item.movie} - {item.rating}
-          </li>
+      {/* Recommendations */}
+      <div className="grid">
+        {recommendations.map((rec, index) => (
+          <div className="card" key={index}>
+            <h3>{rec.movie}</h3>
+            <p>⭐ {rec.rating.toFixed(2)}</p>
+          </div>
         ))}
-      </ul>
+      </div>
+
     </div>
   );
 }
