@@ -1,81 +1,178 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
 
 function App() {
-  const [userId, setUserId] = useState("");
+  const [userId, setUserId] = useState(null);
+  const [isRegister, setIsRegister] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
   const [recommendations, setRecommendations] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [trending, setTrending] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
 
-  const fetchRecommendations = async () => {
-    console.log("BUTTON CLICKED ");
+  const BASE_URL = "https://recommender-backend-b4rq.onrender.com";
 
-    if (!userId) {
-      alert("Please enter User ID");
+  // 🔐 AUTH
+  const handleAuth = async () => {
+    console.log("BUTTON CLICKED");
+
+    if (!username || !password) {
+      alert("Enter username & password");
       return;
     }
 
+    const endpoint = isRegister ? "register" : "login";
+
     try {
-      setLoading(true);
-
-      
-      const res = await fetch(`https://recommender-backend-b4rq.onrender.com/recommend/${userId}`);
-
-      if (!res.ok) {
-        throw new Error("API not responding");
-      }
+      const res = await fetch(`${BASE_URL}/${endpoint}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
 
       const data = await res.json();
-      console.log("DATA:", data);
 
-      setRecommendations(data);
-    } catch (error) {
-      console.error("ERROR:", error);
-      alert("Failed to fetch recommendations");
-    } finally {
-      setLoading(false);
+      if (isRegister) {
+        alert(data.message || data.error);
+      } else {
+        if (data.user_id) {
+          setUserId(data.user_id);
+        } else {
+          alert(data.error);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Server error");
     }
   };
 
-  return (
-    <div className="app">
-      
-     
-      <div className="navbar">
-        <h1>🎬 MovieFlix</h1>
-      </div>
+  // 🎬 RECOMMEND
+  const fetchRecommendations = async () => {
+    const res = await fetch(`${BASE_URL}/recommend/${userId}`);
+    const data = await res.json();
+    setRecommendations(data);
+  };
 
-     
-      <div className="input-section">
+  // 🔥 TRENDING
+  const fetchTrending = async () => {
+    const res = await fetch(`${BASE_URL}/trending`);
+    const data = await res.json();
+    setTrending(data);
+  };
+
+  useEffect(() => {
+    if (userId) fetchTrending();
+  }, [userId]);
+
+  // 🔍 SEARCH
+  const searchMovie = async (query) => {
+    if (!query) {
+      setSearchResults([]);
+      return;
+    }
+
+    const res = await fetch(`${BASE_URL}/search/${query}`);
+    const data = await res.json();
+    setSearchResults(data);
+  };
+
+  // 💾 SAVE HISTORY
+  const saveHistory = async (movie) => {
+    await fetch(`${BASE_URL}/save`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ user_id: userId, movie }),
+    });
+  };
+
+  // 🔐 LOGIN UI
+  if (!userId) {
+    return (
+      <div className="login">
+        <h2>{isRegister ? "Register" : "Login"}</h2>
+
         <input
-          type="number"
-          placeholder="Enter User ID"
-          value={userId}
-          onChange={(e) => setUserId(Number(e.target.value))}
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
         />
 
-        <button onClick={fetchRecommendations}>
-          Get Recommendations
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        <button onClick={handleAuth}>
+          {isRegister ? "Register" : "Login"}
         </button>
+
+        <p onClick={() => setIsRegister(!isRegister)}>
+          {isRegister ? "Login instead" : "Register new user"}
+        </p>
+      </div>
+    );
+  }
+
+  // 🎬 MAIN UI
+  return (
+    <div className="app">
+      <div className="navbar">
+        <h1>🎬 MovieFlix</h1>
+        <button onClick={() => setUserId(null)}>Logout</button>
       </div>
 
-     
-      {loading && <p>Loading recommendations...</p>}
+      {/* SEARCH */}
+      <input
+        className="search"
+        placeholder="Search movies..."
+        onChange={(e) => searchMovie(e.target.value)}
+      />
 
-      
-      {!loading && recommendations.length === 0 && (
-        <p>No recommendations yet</p>
-      )}
-
-      
       <div className="grid">
-        {recommendations.map((rec, index) => (
-          <div className="card" key={index}>
+        {searchResults.map((movie, i) => (
+          <div className="card" key={i}>
+            {movie}
+          </div>
+        ))}
+      </div>
+
+      {/* RECOMMEND */}
+      <h2>Recommended for You</h2>
+      <button className="main-btn" onClick={fetchRecommendations}>
+        Get Recommendations
+      </button>
+
+      <div className="grid">
+        {recommendations.map((rec, i) => (
+          <div
+            className="card"
+            key={i}
+            onClick={() => saveHistory(rec.movie)}
+          >
             <h3>{rec.movie}</h3>
             <p>⭐ {rec.rating.toFixed(2)}</p>
           </div>
         ))}
       </div>
 
+      {/* TRENDING */}
+      <h2>🔥 Trending</h2>
+      <div className="grid">
+        {trending.map((rec, i) => (
+          <div className="card" key={i}>
+            <h3>{rec.movie}</h3>
+            <p>⭐ {rec.rating.toFixed(2)}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
