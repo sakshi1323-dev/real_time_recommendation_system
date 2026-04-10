@@ -1,117 +1,66 @@
-/* Global */
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background-color: #141414;
+  font-family: Arial;
+  background: #111;
   color: white;
-}
-
-
-.app {
-  text-align: center;
 }
 
 .navbar {
-  background-color: black;
-  padding: 15px;
-  text-align: left;
-  padding-left: 30px;
-}
-
-.navbar h1 {
-  color: #e50914;
-  margin: 0;
-}
-
-
-.input-section {
-  margin: 30px auto;
-}
-
-.input-section input {
+  background: black;
   padding: 10px;
-  width: 220px;
-  margin-right: 10px;
-  border-radius: 5px;
-  border: none;
+  display: flex;
+  justify-content: space-between;
 }
 
-.input-section button {
-  padding: 10px 15px;
-  background-color: #e50914;
-  border: none;
+.search-container {
+  margin: 20px;
+}
+
+.search {
+  padding: 10px;
+  width: 250px;
+}
+
+.main-btn {
+  margin-left: 10px;
+  padding: 10px;
+  background: red;
   color: white;
-  border-radius: 5px;
-  cursor: pointer;
+  border: none;
 }
-
-.input-section button:hover {
-  background-color: #f40612;
-}
-
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, 200px);
   gap: 20px;
   padding: 20px;
 }
 
-/* Card */
 .card {
-  background-color: #1f1f1f;
-  padding: 15px;
-  border-radius: 8px;
-  text-align: left;
-  transition: transform 0.2s ease;
+  background: #222;
+  padding: 10px;
+  cursor: pointer;
 }
 
-.card:hover {
-  transform: scale(1.05);
-}
-
-.card h3 {
-  margin: 0 0 10px 0;
-  font-size: 16px;
-}
-
-.card p {
-  margin: 0;
-  color: #bbb;
-}
 .login {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  height: 100vh;
-  background: #111;
-  color: white;
+  margin-top: 100px;
 }
 
 .login input {
   margin: 10px;
   padding: 10px;
-  width: 250px;
-  border-radius: 5px;
-  border: none;
 }
 
 .login button {
-  margin: 10px;
-  padding: 10px 20px;
+  margin: 5px;
+  padding: 10px;
   background: red;
   color: white;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
 }
 
-.main-btn {
-  margin: 10px;
-  padding: 10px 20px;
-  background: red;
-  color: white;
-  border: none;
-  cursor: pointer;
+.forgot {
+  color: lightblue;
 }
