@@ -4,24 +4,21 @@ import pandas as pd
 from model.recommender import build_model, recommend
 import os
 import sqlite3
-
-app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+app=Flask(__name__)
+CORS(app,resources={r"/*":{"origins":"*"}})
 
 def create_tables():
-    conn = sqlite3.connect("database.db", check_same_thread=False)
-    cursor = conn.cursor()
-
+    conn=sqlite3.connect("database.db",check_same_thread=False)
+    cursor=conn.cursor()
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS users (
+    CREATE TABLE IF NOT EXISTS users(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE,
         password TEXT
     )
     """)
-
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS history (
+    CREATE TABLE IF NOT EXISTS history(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER,
         movieId INTEGER,
@@ -29,93 +26,72 @@ def create_tables():
         genres TEXT
     )
     """)
-
     conn.commit()
     conn.close()
-
 create_tables()
 
-# ---------- LOAD DATA ----------
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-file_path = os.path.join(BASE_DIR, "data", "merged_data.csv")
-df = pd.read_csv(file_path)
-# BUILD MODEL (IMPORTANT)
-user_item, similarity = build_model(df)
-# 🔥 FIX GENRE COLUMN
+BASE_DIR=os.path.dirname(os.path.abspath(__file__))
+file_path=os.path.join(BASE_DIR,"data","merged_data.csv")
+df=pd.read_csv(file_path)
+user_item,similarity=build_model(df)
 def get_genre(row):
     if "genres" in row and pd.notna(row["genres"]):
         return row["genres"]
-    return ""   # ✅ NO "Unknown"
+    return ""  
 
-# ---------- ROUTES ----------
 @app.route("/")
 def home():
     return "API Running"
 
-# 🔐 REGISTER
-@app.route("/register", methods=["POST"])
+@app.route("/register",methods=["POST"])
 def register():
-    data = request.json
-    conn = sqlite3.connect("database.db", check_same_thread=False)
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT * FROM users WHERE username=?", (data["username"],))
+    data=request.json
+    conn=sqlite3.connect("database.db",check_same_thread=False)
+    cursor=conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE username=?",(data["username"],))
     if cursor.fetchone():
-        return {"message": "User already exists"}
-
+        return {"message":"User already exists"}
     cursor.execute(
-        "INSERT INTO users (username, password) VALUES (?, ?)",
-        (data["username"], data["password"])
+        "INSERT INTO users (username,password) VALUES (?, ?)",
+        (data["username"],data["password"])
     )
-
     conn.commit()
     conn.close()
-    return {"message": "Registered successfully"}
+    return {"message":"Registered successfully"}
 
-# 🔐 LOGIN
-@app.route("/login", methods=["POST"])
+@app.route("/login",methods=["POST"])
 def login():
-    data = request.json
-    conn = sqlite3.connect("database.db", check_same_thread=False)
-    cursor = conn.cursor()
-
+    data=request.json
+    conn=sqlite3.connect("database.db",check_same_thread=False)
+    cursor=conn.cursor()
     cursor.execute(
         "SELECT * FROM users WHERE username=? AND password=?",
-        (data["username"], data["password"])
+        (data["username"],data["password"])
     )
-
-    user = cursor.fetchone()
+    user=cursor.fetchone()
     conn.close()
-
     if user:
-        return {"user_id": user[0]}
-    return {"error": "Invalid credentials"}, 401
+        return {"user_id":user[0]}
+    return {"error":"Invalid credentials"},401
 
-# 🔐 FORGOT PASSWORD (simple reset)
-@app.route("/forgot-password", methods=["POST"])
+@app.route("/forgot-password",methods=["POST"])
 def forgot_password():
-    data = request.json
-    conn = sqlite3.connect("database.db", check_same_thread=False)
-    cursor = conn.cursor()
-
+    data=request.json
+    conn=sqlite3.connect("database.db",check_same_thread=False)
+    cursor=conn.cursor()
     cursor.execute("UPDATE users SET password=? WHERE username=?",
-                   ("1234", data["username"]))
-
+                   ("1234",data["username"]))
     conn.commit()
     conn.close()
+    return {"message":"Password reset to 1234"}
 
-    return {"message": "Password reset to 1234"}
-
-# 💾 SAVE HISTORY
-@app.route("/save", methods=["POST"])
+@app.route("/save",methods=["POST"])
 def save_history():
-    data = request.json
-
-    conn = sqlite3.connect("database.db", check_same_thread=False)
-    cursor = conn.cursor()
-
+    data=request.json
+    conn=sqlite3.connect("database.db",check_same_thread=False)
+    cursor=conn.cursor()
     cursor.execute("""
-        INSERT INTO history (user_id, movieId, title, genres)
+        INSERT INTO history (user_id,movieId,title,genres)
         VALUES (?, ?, ?, ?)
     """, (
         data["user_id"],
@@ -123,65 +99,50 @@ def save_history():
         data.get("title"),
         data.get("genres")
     ))
-
     conn.commit()
     conn.close()
+    return {"message":"Saved"}
 
-    return {"message": "Saved"}
-
-# 🎬 RECOMMEND
 @app.route("/recommend/<int:user_id>")
 def get_recommendations(user_id):
-   # 🔥 rebuild model using updated data
     user_item, similarity = build_model(df)
-
-    recs = recommend(user_id, user_item, similarity)
-
-    result = []
+    recs=recommend(user_id,user_item,similarity)
+    result=[]
     for m, r in recs.items():
-        movie_data = df[df["title"] == m].iloc[0]
-
+        movie_data=df[df["title"]==m].iloc[0]
         result.append({
-            "movieId": int(movie_data["movieId"]),
-            "title": m,
-            "genres": get_genre(movie_data),
-            "rating": float(r)
+            "movieId":int(movie_data["movieId"]),
+            "title":m,
+            "genres":get_genre(movie_data),
+            "rating":float(r)
         })
-
     return jsonify(result)
 
-# 🔥 TRENDING
 @app.route("/trending")
 def trending():
-    top = df.groupby("title")["rating"].mean().sort_values(ascending=False).head(12)
-
-    result = []
+    top=df.groupby("title")["rating"].mean().sort_values(ascending=False).head(12)
+    result=[]
     for m, r in top.items():
-        movie_data = df[df["title"] == m].iloc[0]
-
+        movie_data=df[df["title"]==m].iloc[0]
         result.append({
-            "movieId": int(movie_data["movieId"]),
-            "title": m,
-            "genres": get_genre(movie_data),
-            "rating": float(r)
+            "movieId":int(movie_data["movieId"]),
+            "title":m,
+            "genres":get_genre(movie_data),
+            "rating":float(r)
         })
-
     return jsonify(result)
 
-# 🔍 SEARCH
 @app.route("/search/<query>")
 def search(query):
-    results = df[df["title"].str.contains(query, case=False, na=False)].drop_duplicates("title").head(12)
-
-    output = []
+    results=df[df["title"].str.contains(query,case=False,na=False)].drop_duplicates("title").head(12)
+    output=[]
     for _, row in results.iterrows():
         output.append({
-            "movieId": int(row["movieId"]),
-            "title": row["title"],
-            "genres": get_genre(row)
+            "movieId":int(row["movieId"]),
+            "title":row["title"],
+            "genres":get_genre(row)
         })
-
     return jsonify(output)
 
-if __name__ == "__main__":
+if __name__=="__main__":
     app.run(debug=True)
