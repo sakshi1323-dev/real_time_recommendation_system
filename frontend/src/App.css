@@ -1,66 +1,140 @@
 body {
   margin: 0;
   font-family: Arial;
-  background: #111;
+  background: #141414;
   color: white;
 }
 
-.navbar {
-  background: black;
-  padding: 10px;
+/* LOGIN */
+.login {
+  height: 100vh;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
+.login input {
+  width: 250px;
+  padding: 12px;
+  margin: 10px;
+  border-radius: 5px;
+  border: none;
+}
+
+.login button {
+  width: 250px;
+  padding: 12px;
+  background: #e50914;
+  color: white;
+  border: none;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+.login p {
+  margin-top: 10px;
+  cursor: pointer;
+  color: #bbb;
+}
+
+/* NAVBAR */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px 30px;
+  background: black;
+}
+
+.navbar h1 {
+  color: #e50914;
+}
+
+/* SEARCH */
 .search-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
   margin: 20px;
 }
 
 .search {
+  width: 300px;
   padding: 10px;
-  width: 250px;
 }
 
-.main-btn {
-  margin-left: 10px;
-  padding: 10px;
-  background: red;
-  color: white;
+/* BUTTON */
+.main-btn, .navbar button {
+  background: #e50914;
   border: none;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, 200px);
-  gap: 20px;
-  padding: 20px;
-}
-
-.card {
-  background: #222;
-  padding: 10px;
+  padding: 10px 20px;
+  color: white;
   cursor: pointer;
 }
 
-.login {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 100px;
+
+/* INFO */
+.info {
+  text-align: center;
+  color: #bbb;
+}
+/* SECTION */
+.section {
+  width: 100%;
+  max-width: 1200px;
+  margin: auto;
+  padding: 20px;
 }
 
-.login input {
-  margin: 10px;
-  padding: 10px;
+/* GRID */
+.movies-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 18px;
+  justify-content: center;
 }
 
-.login button {
-  margin: 5px;
-  padding: 10px;
-  background: red;
+/* CARD */
+.movie-card {
+  background: #181818;
+  padding: 16px;
+  border-radius: 10px;
+  transition: 0.3s;
+  cursor: pointer;
+  text-align: left;
+}
+
+.movie-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px red;
+}
+
+/* TITLE */
+.movie-card h3 {
+  font-size: 15px;
+  margin-bottom: 8px;
   color: white;
 }
 
-.forgot {
-  color: lightblue;
+/* GENRE */
+.movie-card p {
+  font-size: 13px;
+  color: #bbb;
+}
+
+/* RATING */
+.rating {
+  margin-top: 8px;
+  color: gold;
+  font-size: 13px;
+}
+body {
+  background: black;
+  font-family: Arial;
+  margin: 0;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 15px;
 }
