@@ -39,11 +39,8 @@ function App() {
     if (isRegister) {
       alert(data.message);
     } else {
-      if (data.user_id) {
-        setUserId(data.user_id);
-      } else {
-        alert(data.error);
-      }
+      if (data.user_id) setUserId(data.user_id);
+      else alert(data.error);
     }
   };
 
@@ -55,17 +52,25 @@ function App() {
   };
 
   // 🎬 RECOMMEND
-  const getRecommendations = async () => {
+const getRecommendations = async () => {
+  try {
+    setRecommendations([]);  // 🔥 force refresh
+
     const res = await fetch(`${BASE_URL}/recommend/${userId}`);
     const data = await res.json();
-    setRecommendations(data);
-  };
 
-  // 💾 SAVE
-  const saveHistory = async (movie) => {
-    await fetch(`${BASE_URL}/save`, {
+    setRecommendations(data);
+
+  } catch (err) {
+    console.error("Recommendation error:", err);
+  }
+};
+  // 💾 SAVE CLICK
+ const handleMovieClick = async (movie) => {
+  try {
+    const res = await fetch(`${BASE_URL}/save`, {
       method: "POST",
-      headers: {"Content-Type": "application/json"},
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         user_id: userId,
         movieId: movie.movieId,
@@ -74,25 +79,24 @@ function App() {
       })
     });
 
-    alert(`Saved: ${movie.title}`);
-  };
+    const data = await res.json();
+    console.log("Saved:", data);
 
-  // 🔐 LOGIN UI
+    // 🔥 ADD THIS LINE (VERY IMPORTANT)
+    getRecommendations();
+
+  } catch (err) {
+    console.error("ERROR:", err);
+  }
+};
+  // 🔐 LOGIN PAGE
   if (!userId) {
     return (
       <div className="login">
         <h1>🎬 MovieFlix</h1>
 
-        <input
-          placeholder="Username"
-          onChange={(e) => setUsername(e.target.value)}
-        />
-
-        <input
-          type="password"
-          placeholder="Password"
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <input placeholder="Username" onChange={e => setUsername(e.target.value)} />
+        <input type="password" placeholder="Password" onChange={e => setPassword(e.target.value)} />
 
         <button onClick={handleAuth}>
           {isRegister ? "Register" : "Login"}
@@ -114,73 +118,70 @@ function App() {
         <h1>🎬 MovieFlix</h1>
         <button onClick={() => setUserId(null)}>Logout</button>
       </div>
-
-      {/* SEARCH */}
-      <div className="search-container">
-        <input
-          className="search"
-          placeholder="Search movies..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-        <button className="main-btn" onClick={handleSearch}>Search</button>
-      </div>
-
-      {/* SEARCH RESULTS */}
-      <div className="section">
-        <h2>Search Results</h2>
-        <div className="movies-grid">
-          {searchResults.map((movie, i) => (
-            <div
-              className="movie-card"
-              key={i}
-              onClick={() => saveHistory(movie)}
-            >
-              <h3>{movie.title}</h3>
-              {movie.genre && <p>{movie.genre}</p>}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* RECOMMEND */}
-      <div className="section">
-        <h2>Recommended</h2>
-        <button className="main-btn" onClick={getRecommendations}>
-          Get Recommendations
-        </button>
-
-        <div className="movies-grid">
-          {recommendations.map((movie, i) => (
-            <div
-              key={i}
-              className="movie-card"
-              onClick={() => saveHistory(movie)}
-            >
-              <h3>{movie.title}</h3>
-              {movie.genres && <p>{movie.genres}</p>}
-              {movie.rating && (
-                <div className="rating">⭐ {movie.rating.toFixed(1)}</div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* HOW IT WORKS */}
-      <div className="section">
-        <h3>📊 How it works</h3>
-        <p className="info">
-          Uses collaborative filtering and recommends movie based on your searched and clicked movies.
+       {/* HOW IT WORKS */}
+      <div className="info-section">
+        <p>
+            <bold>Recommends movies based on your recent searches and clicks</bold>
         </p>
       </div>
+
+ {/* 🔍 SEARCH + RECOMMEND */}
+<div className="search-container">
+  <input
+    className="search"
+    placeholder="Search movies..."
+    value={searchQuery}
+    onChange={(e) => setSearchQuery(e.target.value)}
+  />
+
+  <button className="main-btn" onClick={handleSearch}>
+    Search
+  </button>
+
+  <button className="main-btn" onClick={getRecommendations}>
+    Get Recommendations
+  </button>
+</div>
+
+      {/* SEARCH RESULTS */}
+      {searchResults.length > 0 && (
+        <div className="section">
+          <h2>Search Results</h2>
+          <div className="movies-grid">
+            {searchResults.map((movie, i) => (
+              <div key={i} className="movie-card" onClick={() => handleMovieClick(movie)}>
+                <h3>{movie.title}</h3>
+                {movie.genres && <p>{movie.genres}</p>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* RECOMMENDATIONS */}
+      {recommendations.length > 0 && (
+        <div className="section">
+          <h2>Recommended Movies</h2>
+          <div className="movies-grid">
+            {recommendations.map((movie, i) => (
+              <div key={i} className="movie-card">
+                <h3>{movie.title}</h3>
+                {movie.genres && <p>{movie.genres}</p>}
+                <div className="rating">⭐ {movie.rating.toFixed(1)}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+     
 
       {/* TRENDING */}
       <div className="section">
         <h2>🔥 Trending</h2>
         <div className="movies-grid">
           {trending.map((movie, i) => (
-            <div className="movie-card" key={i}>
+            <div key={i} className="movie-card">
               <h3>{movie.title}</h3>
               {movie.genres && <p>{movie.genres}</p>}
               <div className="rating">⭐ {movie.rating.toFixed(1)}</div>

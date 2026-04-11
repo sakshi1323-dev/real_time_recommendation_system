@@ -8,7 +8,6 @@ import sqlite3
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-# ---------- DB ----------
 def create_tables():
     conn = sqlite3.connect("database.db", check_same_thread=False)
     cursor = conn.cursor()
@@ -40,7 +39,8 @@ create_tables()
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 file_path = os.path.join(BASE_DIR, "data", "merged_data.csv")
 df = pd.read_csv(file_path)
-
+# BUILD MODEL (IMPORTANT)
+user_item, similarity = build_model(df)
 # 🔥 FIX GENRE COLUMN
 def get_genre(row):
     if "genres" in row and pd.notna(row["genres"]):
@@ -132,6 +132,9 @@ def save_history():
 # 🎬 RECOMMEND
 @app.route("/recommend/<int:user_id>")
 def get_recommendations(user_id):
+   # 🔥 rebuild model using updated data
+    user_item, similarity = build_model(df)
+
     recs = recommend(user_id, user_item, similarity)
 
     result = []
